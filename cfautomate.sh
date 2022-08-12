@@ -2,13 +2,53 @@
 echo "It also provides the template for a new terraform repository and initialize with cloudflare provider"
 printf "Cf-Terraform-Automate - A shell script to automate the zone creation , DNS management and other features of Cloudflare. It also provides the template for a new terraform repository and initialize with cloudflare provider\nChoose from [0-3] to do specific functions from cloudflare\n1.Create new zone\n2.Import cloudflare resources into the terraform\n3.Exit\n"
 read cf_option
-
 echo "cloudflare_email:"
 read cf_email
 echo "cloudflare_key"
 read cf_key
 
-if [ $cf_option -eq '1' ];  
+if [ $cf_option -eq '1' ];
+then
+    echo "Creating a new terraform repository and initializing the cloudflare in it"
+    echo "Please provide the reposistory name"
+    read repo_name
+    mkdir -p $repo_name/modules 
+    touch $repo_name/{main.tf,secret.tfvars}
+    echo 'terraform {
+  required_providers {
+    cloudflare = {
+      source = "cloudflare/cloudflare"
+      version = "~> 3.0"
+    }
+  }
+}
+
+variable "cloudflare_email" {
+  description = "Email authentication for cloudflare"
+  type        = string
+  sensitive   = true
+}
+
+variable "cloudflare_key" {
+  description = "Key for cloudflare"
+  type        = string
+  sensitive   = true
+}  
+
+provider "cloudflare" {
+  email = var.cloudflare_email
+  api_key =  var.cloudflare_key
+}
+
+' > $repo_name/main.tf
+
+echo 'cloudflare_email="'$cf_email'"
+cloudflare_key="'$cf_key'"' > $repo_name/secret.tfvars
+
+cd $repo_name/ && terraform init
+
+
+elif [ $cf_option -eq '2' ];  
 then 
     echo "Please provide the module name {website_name}" 
     read module_name
@@ -73,7 +113,7 @@ then
 
     terraform init
     terraform apply  --var-file=secret.tfvars --target=module.$module_name
-elif [ $cf_option -eq '2' ]; 
+elif [ $cf_option -eq '3' ]; 
 then
     echo "Please provide the module name {website_name-domain_prefix}"
     read module_name
