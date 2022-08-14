@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "It also provides the template for a new terraform repository and initialize with cloudflare provider"
-printf "Cf-Terraform-Automate - A shell script to automate the zone creation , DNS management and other features of Cloudflare. It also provides the template for a new terraform repository and initialize with cloudflare provider\nChoose from [0-3] to do specific functions from cloudflare\n1.Create new zone\n2.Import cloudflare resources into the terraform\n3.Exit\n"
+printf "Cf-Terraform-Automate - A shell script to automate the zone creation , DNS management and other features of Cloudflare. It also provides the template for a new terraform repository and initialize with cloudflare provider\nChoose from [1-4] to do specific functions from cloudflare\n1.Initiate a new terraform repository\n2.Create new zone\n3.Import cloudflare resources into the terraform\n4.Exit\n"
 read cf_option
 echo "cloudflare_email:"
 read cf_email
@@ -21,31 +21,31 @@ then
       version = "~> 3.0"
     }
   }
-}
+  }
 
-variable "cloudflare_email" {
-  description = "Email authentication for cloudflare"
-  type        = string
-  sensitive   = true
-}
+  variable "cloudflare_email" {
+    description = "Email authentication for cloudflare"
+    type        = string
+    sensitive   = true
+  }
 
-variable "cloudflare_key" {
-  description = "Key for cloudflare"
-  type        = string
-  sensitive   = true
-}  
+  variable "cloudflare_key" {
+    description = "Key for cloudflare"
+    type        = string
+    sensitive   = true
+  }  
 
-provider "cloudflare" {
-  email = var.cloudflare_email
-  api_key =  var.cloudflare_key
-}
+  provider "cloudflare" {
+    email = var.cloudflare_email
+    api_key =  var.cloudflare_key
+  }
 
-' > $repo_name/main.tf
+  ' > $repo_name/main.tf
 
-echo 'cloudflare_email="'$cf_email'"
-cloudflare_key="'$cf_key'"' > $repo_name/secret.tfvars
+  echo 'cloudflare_email="'$cf_email'"
+  cloudflare_key="'$cf_key'"' > $repo_name/secret.tfvars
 
-cd $repo_name/ && terraform init
+  cd $repo_name/ && terraform init
 
 
 elif [ $cf_option -eq '2' ];  
@@ -71,13 +71,6 @@ then
     plan = "free"
     }
 
-     output "zone_id_'$module_name'" {
-    value = cloudflare_zone.domain-'$module_name'.id
-    }
-
-    output "nameservers_'$module_name'" {
-    value = cloudflare_zone.domain-'$module_name'.name_servers
-    }
 
     ' >> modules/$module_name/register.tf
 
