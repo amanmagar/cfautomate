@@ -105,7 +105,54 @@ then
     ' >> modules/$module_name/provider.tf
 
     terraform init
-    terraform apply  --var-file=secret.tfvars --target=module.$module_name
+    terraform apply --auto-approve --var-file=secret.tfvars --target=module.$module_name
+
+    echo '
+    resource "cloudflare_record" "terraform_managed_resource_59c3ec63690d7e5581e09506c5c2472a" {
+  name    = "'$module_name'.'$domain_prefix'"
+  proxied = true
+  ttl     = 1
+  type    = "A"
+  value   = "159.223.87.68"
+  zone_id = cloudflare_zone.domain-'$module_name'.id
+}
+
+resource "cloudflare_record" "terraform_managed_resource_b9dacd7d69d52c104bfb0f2e14684c41" {
+  name    = "www"
+  proxied = true
+  ttl     = 1
+  type    = "CNAME"
+  value   = "'$module_name'.'$domain_prefix'"
+  zone_id = cloudflare_zone.domain-'$module_name'.id
+}
+
+    ' >> modules/$module_name/records.tf
+
+echo 'resource "cloudflare_zone_settings_override" "settings" {
+  zone_id = cloudflare_zone.domain-'$module_name'.id
+  settings {
+    minify {
+      css  = "on"
+      html = "on"
+      js   = "on"
+    }
+    security_header {
+      enabled            = false
+      include_subdomains = false
+      max_age            = 0
+      nosniff            = false
+      preload            = false
+    }
+    always_online               = "on"
+    always_use_https            = "on"
+    automatic_https_rewrites    = "on"
+    brotli                      = "on"
+    ssl = "full"
+  }
+}' >> modules/$1/settings.tf
+
+terraform plan --var-file=secret.tfvars --target=module.$module_name
+
 elif [ $cf_option -eq '3' ]; 
 then
     echo "Please provide the module name {website_name-domain_prefix}"
