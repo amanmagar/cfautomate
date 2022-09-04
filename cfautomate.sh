@@ -54,6 +54,8 @@ then
     read module_name
     echo "Please provide the website prefix (org,com,com.np) " 
     read domain_prefix
+    echo "Please provide the server IP"
+    read server_ip
     echo "Creating new zone in cloudflare with the provided credentials, the nameservers and zone id are outputed after terraform apply  "
         mkdir -p modules/$module_name
 
@@ -106,14 +108,13 @@ then
 
     terraform init
     terraform apply --auto-approve --var-file=secret.tfvars --target=module.$module_name
-
     echo '
     resource "cloudflare_record" "terraform_managed_resource_59c3ec63690d7e5581e09506c5c2472a" {
   name    = "'$module_name'.'$domain_prefix'"
   proxied = true
   ttl     = 1
   type    = "A"
-  value   = "159.223.87.68"
+  value   = "'$server_ip'"
   zone_id = cloudflare_zone.domain-'$module_name'.id
 }
 
@@ -149,7 +150,7 @@ echo 'resource "cloudflare_zone_settings_override" "settings" {
     brotli                      = "on"
     ssl = "full"
   }
-}' >> modules/$1/settings.tf
+}' >> modules/$module_name/settings.tf
 
 terraform plan --var-file=secret.tfvars --target=module.$module_name
 
